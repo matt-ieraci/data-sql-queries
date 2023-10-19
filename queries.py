@@ -56,7 +56,21 @@ def late_released_movies(db):
 
 def stats_on(db, genre_name):
     '''return a dict of stats for a given genre'''
-    pass  # YOUR CODE HERE
+    conn, db = connect_to_database()
+    db.execute(
+        f"SELECT genres, COUNT(title), AVG(minutes)\
+            FROM movies\
+            WHERE genres = '{genre_name}'"
+        )
+    rows = db.fetchall()
+    movie_dict = {}
+    for row in rows:
+        formatted_avg = f"{row[2]:.2f}"
+        movie_dict['genre'] = row[0]
+        movie_dict['number_of_movies'] = row[1]
+        movie_dict['avg_length'] = float(formatted_avg)
+    close_database(conn)
+    return movie_dict
 
 
 def top_five_directors_for(db, genre_name):
