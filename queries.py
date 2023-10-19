@@ -1,8 +1,39 @@
 # pylint: disable=C0103, missing-docstring
+import sqlite3
+
+# conn = sqlite3.connect('data/movies.sqlite')
+# db = conn.cursor()
+# db.execute("YOUR SQL QUERY")
+# rows = db.fetchall()
+# print(rows)
+
+
+def connect_to_database():
+    # create connection to sql databate
+    # initialize cursor
+    conn = sqlite3.connect('data/movies.sqlite')
+    db = conn.cursor()
+    return conn,  db
+
+
+def close_database(conn):
+    # close database connection
+    conn.close()
+
 
 def detailed_movies(db):
     '''return the list of movies with their genres and director name'''
-    pass  # YOUR CODE HERE
+    conn, db = connect_to_database()
+    db.execute(
+        "SELECT title, genres, name\
+            FROM movies \
+            JOIN directors\
+            ON movies.director_id = directors.id"
+        )
+    rows = db.fetchall()
+    close_database(conn)
+    return rows
+    
 
 
 def late_released_movies(db):
