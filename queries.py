@@ -38,7 +38,20 @@ def detailed_movies(db):
 
 def late_released_movies(db):
     '''return the list of all movies released after their director death'''
-    pass  # YOUR CODE HERE
+    conn, db = connect_to_database()
+    db.execute(
+        "SELECT title\
+            FROM movies\
+            JOIN directors\
+                ON movies.director_id = directors.id\
+                WHERE movies.start_year > directors.death_year"
+        )
+    rows = db.fetchall()
+    late_release_list = []
+    for row in rows:
+        late_release_list.append(row[0])
+    close_database(conn)
+    return late_release_list
 
 
 def stats_on(db, genre_name):
