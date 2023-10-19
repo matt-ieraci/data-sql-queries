@@ -76,11 +76,26 @@ def stats_on(db, genre_name):
 def top_five_directors_for(db, genre_name):
     '''return the top 5 of the directors with the most movies for a given genre'''
     pass  # YOUR CODE HERE
-
+    #SELECT name FROM directors WHERE movies.genres = 'Action,Adventure,Comedy' JOIN movies ON movies.director_id = directors.id ORDER BY movies.title DESC LIMIT 5 
 
 def movie_duration_buckets(db):
     '''return the movie counts grouped by bucket of 30 min duration'''
-    pass  # YOUR CODE HERE
+    conn, db = connect_to_database()
+    i = 0
+    j = 30
+    movie_duration_list = []
+    while j < 1020:
+        db.execute(
+            f"SELECT COUNT(*) FROM movies WHERE minutes > {i} AND minutes < {j}"
+            )
+        rows = db.fetchall()
+        row_tuple = tuple((j, rows[0][0]))
+        movie_duration_list.append(row_tuple)
+        i += 30
+        j += 30
+    close_database(conn)
+    return movie_duration_list
+    
 
 
 def top_five_youngest_newly_directors(db):
