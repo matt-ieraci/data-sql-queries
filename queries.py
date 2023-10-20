@@ -86,13 +86,16 @@ def movie_duration_buckets(db):
     movie_duration_list = []
     while j <= 1020:
         db.execute(
-            f"SELECT COUNT(*) FROM movies WHERE minutes > {i} AND minutes < {j}"
+            "SELECT COUNT(*) FROM movies WHERE minutes >= ? AND minutes < ?", (i,j)
             )
-        rows = db.fetchall()
-        row_tuple = tuple((j, rows[0][0]))
-        movie_duration_list.append(row_tuple)
-        i += 30
+        rows = db.fetchone()
+        if rows[0] != 0:    
+            row_tuple = (j, rows[0])
+            movie_duration_list.append(row_tuple)
+        i = j
         j += 30
+    
+    
     close_database(conn)
     return movie_duration_list
     
