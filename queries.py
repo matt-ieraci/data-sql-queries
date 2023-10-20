@@ -33,7 +33,7 @@ def detailed_movies(db):
     rows = db.fetchall()
     close_database(conn)
     return rows
-    
+
 
 
 def late_released_movies(db):
@@ -75,8 +75,23 @@ def stats_on(db, genre_name):
 
 def top_five_directors_for(db, genre_name):
     '''return the top 5 of the directors with the most movies for a given genre'''
-    pass  # YOUR CODE HERE
-    #SELECT name FROM directors WHERE movies.genres = 'Action,Adventure,Comedy' JOIN movies ON movies.director_id = directors.id ORDER BY movies.title DESC LIMIT 5 
+    conn, db = connect_to_database()
+    db.execute(
+        '''
+    SELECT directors.name, COUNT(*) AS movie_count
+    FROM directors
+    JOIN movies ON movies.director_id = directors.id
+    WHERE movies.genres = ?
+    GROUP BY directors.name
+    ORDER BY movie_count DESC, directors.name
+    LIMIT 5
+        ''', (genre_name,)
+        )
+    rows = db.fetchall()
+    top_five_list = [(row[0], row[1]) for row in rows]
+    close_database(conn)
+    return top_five_list
+
 
 def movie_duration_buckets(db):
     '''return the movie counts grouped by bucket of 30 min duration'''
@@ -89,16 +104,16 @@ def movie_duration_buckets(db):
             "SELECT COUNT(*) FROM movies WHERE minutes >= ? AND minutes < ?", (i,j)
             )
         rows = db.fetchone()
-        if rows[0] != 0:    
+        if rows[0] != 0:
             row_tuple = (j, rows[0])
             movie_duration_list.append(row_tuple)
         i = j
         j += 30
-    
-    
+
+
     close_database(conn)
     return movie_duration_list
-    
+
 
 
 def top_five_youngest_newly_directors(db):
@@ -106,13 +121,13 @@ def top_five_youngest_newly_directors(db):
     conn, db = connect_to_database()
     db.execute(
         '''
-        SELECT directors.name, 
+        SELECT directors.name,
             MIN(movies.start_year- directors.birth_year)
             AS age_at_first_movie
         FROM directors
         JOIN movies ON movies.director_id = directors.id
         WHERE directors.birth_year  IS NOT NULL AND movies.start_year IS NOT NULL
-        GROUP BY directors.name, directors.id 
+        GROUP BY directors.name, directors.id
         ORDER BY age_at_first_movie
         LIMIT 5
         '''
@@ -123,4 +138,3 @@ def top_five_youngest_newly_directors(db):
         top_5_directors.append((row[0], row[1]))
     close_database(conn)
     return top_5_directors
-    
