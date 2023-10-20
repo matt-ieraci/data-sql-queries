@@ -84,7 +84,7 @@ def movie_duration_buckets(db):
     i = 0
     j = 30
     movie_duration_list = []
-    while j < 1020:
+    while j <= 1020:
         db.execute(
             f"SELECT COUNT(*) FROM movies WHERE minutes > {i} AND minutes < {j}"
             )
@@ -100,4 +100,24 @@ def movie_duration_buckets(db):
 
 def top_five_youngest_newly_directors(db):
     '''return the top 5 youngest directors when they direct their first movie'''
-    pass  # YOUR CODE HERE
+    conn, db = connect_to_database()
+    db.execute(
+        '''
+        SELECT directors.name, 
+            MIN(movies.start_year- directors.birth_year)
+            AS age_at_first_movie
+        FROM directors
+        JOIN movies ON movies.director_id = directors.id
+        WHERE directors.birth_year  IS NOT NULL AND movies.start_year IS NOT NULL
+        GROUP BY directors.name, directors.id 
+        ORDER BY age_at_first_movie
+        LIMIT 5
+        '''
+        )
+    rows = db.fetchall()
+    top_5_directors = []
+    for row in rows:
+        top_5_directors.append((row[0], row[1]))
+    close_database(conn)
+    return top_5_directors
+    
